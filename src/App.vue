@@ -3,90 +3,80 @@
     id="app"
     :class="{ 'dark': dark }"
   >
-    <h1 style="text-align: center;">
+    <h1 class="text-center py-3">
       VuePhoneNumberInput
     </h1>
-    <div
-      v-if="!screenshotMode"
-      class="container"
-    >
-      <a
-        class="btn btn-dark margin-right"
-        target="_blank"
-        href="https://github.com/LouisMazel/vue-phone-number-input"
-      >
-        Github
-      </a>
-      <a
-        class="btn btn-danger"
-        target="_blank"
-        href="https://www.npmjs.com/package/vue-phone-number-input"
-      >
-        NPM
-      </a>
+    <div class="container mb-3 flex direction-column">
+      <div class="flex align-center justify-center mb-3">
+        <a
+          class="btn btn--dark mr-2"
+          target="_blank"
+          href="https://github.com/LouisMazel/vue-phone-number-input"
+        >
+          Github
+        </a>
+        <a
+          class="btn btn--danger"
+          target="_blank"
+          href="https://www.npmjs.com/package/vue-phone-number-input"
+        >
+          NPM
+        </a>
+      </div>
+      <div class="flex align-center justify-center">
+        <button
+          class="btn mr-2"
+          @click="dark = !dark"
+        >
+          Toggle Dark Mode
+        </button>
+
+        <button
+          class="btn btn--success mr-2"
+          @click="hasLoaderActive = !hasLoaderActive"
+        >
+          Toggle loader
+        </button>
+
+        <button
+          class="btn btn--danger"
+          @click="hasErrorActive = !hasErrorActive"
+        >
+          Toggle error
+        </button>
+      </div>
     </div>
-    <div
-      class="container"
-      :style="screenshotMode ? `width: 40%;` : null"
-    >
-      <button
-        class="btn margin-right"
-        @click="dark = !dark"
-      >
-        Toggle Dark Mode
-      </button>
-
-      <button
-        class="btn btn-success margin-right"
-        @click="hasLoaderActive = !hasLoaderActive"
-      >
-        Toggle loader
-      </button>
-
-      <button
-        class="btn btn-danger"
-        @click="hasErrorActive = !hasErrorActive"
-      >
-        Toggle error
-      </button>
-      <div class="component-container">
-        <div class="component">
-          <VuePhoneNumberInput
-            v-if="!screenshotMode"
-            id="phoneNumber1"
-            v-model="phoneNumber"
-            color="purple"
-            :dark="dark"
-            :disabled="disabled"
-            :ignored-countries="countriesIgnored"
-            :preferred-countries="countriesList"
-            :loader="hasLoaderActive"
-            :default-country-code="defaultCountry"
-            :error="hasErrorActive"
-            clearable
-            @update="onUpdate"
-          />
-          <VuePhoneNumberInput
-            v-else
-            id="phoneNumber1"
-            v-model="phoneNumber2"
-            :dark="dark"
-            :loader="hasLoaderActive"
-            :error="hasErrorActive"
-            @update="onUpdate"
-          />
-        </div>
-        <br v-if="!screenshotMode">
-        <div class="component">
-          <div v-if="!screenshotMode">
-            <h3>Datas returned with "update" event</h3>
-            <hr>
+    <div class="container mb-3">
+      <div class="flex flex-wrap">
+        <div class="component-container">
+          <h3 class="mb-2">
+            Basic usage
+          </h3>
+          <div class="component mb-2">
+            <VuePhoneNumberInput
+              id="phoneNumber1"
+              v-model="phoneNumber"
+              color="dodgerblue"
+              :dark="dark"
+              :disabled="disabled"
+              :ignored-countries="countriesIgnored"
+              :preferred-countries="countriesList"
+              :loader="hasLoaderActive"
+              :default-country-code="defaultCountry"
+              clearable
+              :error="hasErrorActive"
+              class="mb-2"
+              @update="onUpdate"
+            />
             <b>v-model</b> : {{ phoneNumber }}
-            <hr>
           </div>
-          <div class="flex flex-wrap">
-            <div class="component">
-              <table>
+
+          <div class="component">
+            <h4 class="mb-2">
+              Datas returned with "update" event
+            </h4>
+            <div class="flex flex-wrap">
+              <table class="mr-2">
                 <tr>
                   <th>Key</th>
                   <th>Value</th>
@@ -94,6 +84,7 @@
                 <tr
                   v-for="item in resultsTable"
                   :key="item"
+                  class="w-100"
                 >
                   <td align="left">
                     {{ item }}
@@ -101,43 +92,44 @@
                   <td>{{ results[item] }}</td>
                 </tr>
               </table>
-            </div>
-            <div class="component flex-1">
-              {{ results }}
+              <div class="flex flex-direction-column flex-1">
+                <b>Payload:</b>
+                {{ results }}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div
-        v-if="!screenshotMode"
-        class="component-container"
-      >
-        <div class="component">
-          <b>With translations (FR) - No flags - Dark - No Use Browser Locale</b>
-          <br>
-          <br>
-          <VuePhoneNumberInput
-            id="phoneNumber2"
-            v-model="phoneNumber2"
-            :translations="translations"
-            dark
-            no-flags
-            required
-            no-use-browser-locale
-            :loader="hasLoaderActive"
-            :error="hasErrorActive"
-            @update="onUpdate2"
-          />
-        </div>
-        <br>
-        <div class="component">
-          <h3>Datas returned with "update" event</h3>
-          <hr>
-          <b>v-model</b> : {{ phoneNumber }}
-          <hr>
-          <div class="flex flex-wrap">
-            <div class="component">
-              <table>
+        <div class="component-container">
+          <h3 class="mb-2">
+            With translations (FR) - No flags - Dark - No Use Browser Locale
+          </h3>
+          <div class="component mb-2">
+            <VuePhoneNumberInput
+              id="phoneNumber2"
+              v-model="phoneNumber2"
+              :translations="translations"
+              :dark="!dark"
+              no-flags
+              required
+              no-use-browser-locale
+              :loader="hasLoaderActive"
+              :error="hasErrorActive"
+              class="mb-2"
+              clearable
+              color="#FF9933"
+              dark-color="#21222e"
+              :border-radius="8"
+              show-code-on-list
+              @update="onUpdate2"
+            />
+            <b>v-model</b> : {{ phoneNumber2 }}
+          </div>
+          <div class="component">
+            <h4 class="mb-2">
+              Datas returned with "update" event
+            </h4>
+            <div class="flex flex-wrap">
+              <table class="mr-2">
                 <tr>
                   <th>Key</th>
                   <th>Value</th>
@@ -145,6 +137,7 @@
                 <tr
                   v-for="item in resultsTable2"
                   :key="item"
+                  class="w-100"
                 >
                   <td align="left">
                     {{ item }}
@@ -152,9 +145,58 @@
                   <td>{{ results2[item] }}</td>
                 </tr>
               </table>
+              <div class="flex flex-direction-column  flex-1">
+                <b>Payload:</b>
+                {{ results2 }}
+              </div>
             </div>
-            <div class="component flex-1">
-              {{ results2 }}
+          </div>
+        </div>
+      </div>
+      <div class="component-container">
+        <h3 class="mb-2">
+          No country chooser (use `default-country-code` to set the country)
+        </h3>
+        <div class="component mb-2">
+          <VuePhoneNumberInput
+            id="phoneNumber3"
+            v-model="phoneNumber3"
+            :loader="hasLoaderActive"
+            :error="hasErrorActive"
+            :dark="dark"
+            :default-country-code="defaultCountry"
+            no-country-selector
+            class="mb-2"
+            @update="onUpdate3"
+          />
+          <b>v-model</b> : {{ phoneNumber2 }}
+          <br>
+          <b>Current country code</b> : {{ defaultCountry }}
+        </div>
+        <div class="component">
+          <h4 class="mb-2">
+            Datas returned with "update" event
+          </h4>
+          <div class="flex flex-wrap">
+            <table class="mr-2">
+              <tr>
+                <th>Key</th>
+                <th>Value</th>
+              </tr>
+              <tr
+                v-for="item in resultsTable3"
+                :key="item"
+                class="w-100"
+              >
+                <td align="left">
+                  {{ item }}
+                </td>
+                <td>{{ results3[item] }}</td>
+              </tr>
+            </table>
+            <div class="flex flex-direction-column flex-1">
+              <b>Payload:</b>
+              {{ results3 }}
             </div>
           </div>
         </div>
@@ -173,9 +215,9 @@
     },
     data() {
       return {
-        screenshotMode: false,
-        phoneNumber: '0665656565',
+        phoneNumber: null,
         phoneNumber2: null,
+        phoneNumber3: '0665656565',
         defaultCountry: 'FR',
         countriesList: ['FR', 'BE', 'DE'],
         countriesIgnored: ['AF', 'AD', 'AL'],
@@ -187,6 +229,7 @@
         },
         results: {},
         results2: {},
+        results3: {},
         dark: false,
         disabled: false,
         hasLoaderActive: false,
@@ -199,197 +242,188 @@
       },
       resultsTable2 () {
         return Object.keys(this.results2)
+      },
+      resultsTable3 () {
+        return Object.keys(this.results3)
       }
     },
     methods: {
-      onUpdate(payload) {
+      onUpdate (payload) {
         this.results = payload
       },
-      onUpdate2(payload) {
+      onUpdate2 (payload) {
         this.results2 = payload
+      },
+      onUpdate3 (payload) {
+        this.results3 = payload
       }
     }
   }
 </script>
 
+<style lang="scss">
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+</style>
+
 <style lang="scss" scoped>
+@import '@/assets/scss/variables';
+@import 'style-helpers';
+
 #app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+  font-family: 'Roboto', 'Avenir', Helvetica, Arial, sans-serif;
+  color: $text-color;
   height: 100%;
   min-height: 100%;
   padding: 1px;
+  margin: 0;
   font-size: 14px;
+
   &.dark {
-    background-color: darken(#424242, 20%);
+    background-color: $bg-color-dark;
+
     h1 {
       color: rgba(255, 255, 255, 0.7);
     }
+
     header {
       color: rgba(255, 255, 255, 0.7);
     }
   }
 }
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: dodgerblue;
+}
+
 hr {
   border: 0;
-  border-top: 1px solid #ebebeb;
+  border-top: 1px solid #EBEBEB;
 }
-.container {
-  width: 70%;
-  margin: 0 auto;
-  text-align: center;
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
-.btn {
-  padding: 10px 20px;
-  margin-bottom: 20px;
-  border: none;
-  display: inline-block;
-  border-radius: 4px;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 12px;
-  outline: none;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1);
-  background-color: dodgerblue;
-  color: white;
-  font-weight: 500;
-  &:hover {
-    background-color: darken(dodgerblue, 10%);
-    box-shadow: 0 0 8px 0 rgba(232, 237, 250, 0.6),
-      0 2px 4px 0 rgba(232, 237, 250, 0.5);
-  }
-  &.option {
-    background-color: #424242;
-    &:hover {
-      background-color: darken(#424242, 10%);
-    }
-  }
-  &.btn-dark {
-    background-color: #424242;
-    &:hover {
-      background-color: darken(#424242, 10%);
-    }
-  }
-  &.btn-danger {
-    background-color: orangered;
-    &:hover {
-      background-color: darken(orangered, 10%);
-    }
-  }
-  &.btn-success {
-    background-color: yellowgreen;
-    &:hover {
-      background-color: darken(yellowgreen, 10%);
-    }
-  }
-}
-.margin-right {
-  margin-right: 20px;
-}
+
 .component {
   padding: 10px;
-  background: #fff;
+  background: #FFF;
   border-radius: 4px;
-  border: 1px solid #ebebeb;
+  border: 1px solid #EBEBEB;
+
   &:hover {
-    box-shadow: 0 0 8px 0 rgba(232, 237, 250, 0.6),
+    box-shadow:
+      0 0 8px 0 rgba(232, 237, 250, 0.6),
       0 2px 4px 0 rgba(232, 237, 250, 0.5);
   }
+
   &.options {
     margin-bottom: 20px;
   }
 }
+
 .component-container {
   margin: 0 10px 20px 10px;
   padding: 20px;
-  background: #fff;
+  background: #FFF;
   border-radius: 4px;
-  border: 1px solid #ebebeb;
+  border: 1px solid #EBEBEB;
   min-width: 300px;
   transition: all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1);
   flex: 1 0 48%;
+
   &:hover {
-    box-shadow: 0 0 8px 0 rgba(232, 237, 250, 0.6),
+    box-shadow:
+      0 0 8px 0 rgba(232, 237, 250, 0.6),
       0 2px 4px 0 rgba(232, 237, 250, 0.5);
   }
+
   &.dark {
-    background-color: darken(#424242, 10%);
-    color: #fff;
+    background-color: $bg-color-dark;
+    color: #FFF;
+
     textarea {
-      background: #424242;
+      background: $bg-color-dark;
       color: dodgerblue;
     }
   }
 }
+
 table {
   border-spacing: 0;
   border-collapse: collapse;
   display: block;
-  width: 100%;
   overflow: auto;
   margin-top: 0;
   margin-bottom: 16px;
+
   tr {
-    background-color: #fff;
-    border-top: 1px solid #c6cbd1;
+    background-color: #FFF;
+    border-top: 1px solid #C6CBD1;
+
     th,
     td {
       padding: 6px 13px;
-      border: 1px solid #dfe2e5;
+      border: 1px solid #DFE2E5;
     }
+
     &:nth-child(2n) {
-      background-color: #f6f8fa;
+      background-color: #F6F8FA;
     }
   }
 }
+
 .dark {
   .component-container,
   .component {
-    border: 1px solid #424242;
-    background-color: darken(#424242, 10%);
+    border: 1px solid $hover-color-dark;
+    background-color: $bg-color-dark;
+
     &:hover {
       box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.6), 0 2px 4px 0 rgba(0, 0, 0, 0.5);
     }
+
     color: rgba(255, 255, 255, 0.7);
   }
+
   hr {
-    border-color: #424242;
+    border-color: $hover-color-dark;
   }
+
   .btn {
     &:hover {
       box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.6), 0 2px 4px 0 rgba(0, 0, 0, 0.5) !important;
     }
   }
+
   table tr {
-    background-color: #424242;
-    border-top: 1px solid #424242;
+    background-color: $hover-color-dark;
+    border-top: 1px solid $hover-color-dark;
+
     th,
     td {
-      border: 1px solid #424242;
+      border: 1px solid $hover-color-dark;
     }
+
     &:nth-child(2n) {
-      background-color: darken(#424242, 10%);
+      background-color: $bg-color-dark;
     }
   }
 }
+
 @media screen and (max-width: 1024px) {
   .components-container.flex {
-    -webkit-flex-direction: column;
-    -ms-flex-direction: column;
     flex-direction: column;
-    flex-flow: column;
-    -moz-flex-direction: column;
   }
 }
 </style>

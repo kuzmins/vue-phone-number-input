@@ -1,20 +1,21 @@
 <template>
   <div
+    :id="id"
     :class="[{ 'dark': dark }, size]"
     class="vue-phone-number-input flex"
   >
-    <div class="select-country-container">
+    <div
+      v-if="!noCountrySelector"
+      class="select-country-container"
+    >
       <CountrySelector
-        :id="`${id}_country_selector`"
+        :id="`${uniqueId}_country_selector`"
         ref="CountrySelector"
         v-model="countryCode"
         :items="codesCountries"
-        :color="color"
         :countries-height="countriesHeight"
-        :valid-color="validColor"
         :error="shouldChooseCountry"
         :hint="shouldChooseCountry ? t.countrySelectorError : null"
-        :dark="dark"
         :disabled="disabled"
         :valid="isValid && !noValidatorState"
         :preferred-countries="preferredCountries"
@@ -22,7 +23,10 @@
         :ignored-countries="ignoredCountries"
         :label="t.countrySelectorLabel"
         :no-flags="noFlags"
+        :show-code-on-list="showCodeOnList"
         :size="size"
+        :dark="dark"
+        :theme="theme"
         class="input-country-selector"
       >
         <slot
@@ -32,22 +36,21 @@
       </CountrySelector>
     </div>
     <div class="flex-1">
-      <VueInputUI
-        :id="`${id}_phone_number`"
+      <InputTel
+        :id="`${uniqueId}_phone_number`"
         ref="PhoneNumberInput"
         v-model="phoneNumber"
         :label="t.phoneNumberLabel"
         :hint="hintValue"
-        :color="color"
-        :valid-color="validColor"
         :dark="dark"
         :disabled="disabled"
         :size="size"
         :error="error"
         :valid="isValid && !noValidatorState"
         :required="required"
-        type="tel"
+        :no-country-selector="noCountrySelector"
         v-bind="$attrs"
+        :theme="theme"
         class="input-phone-number"
         @keydown="(e) => { lastKeyPressed = e.keyCode }"
         @focus="$emit('phone-number-focused')"
@@ -57,14 +60,17 @@
   </div>
 </template>
 <script>
-  /* eslint-disable */
   import { countries, countriesIso } from './assets/js/phoneCodeCountries.js'
   import examples from 'libphonenumber-js/examples.mobile.json'
   import { parsePhoneNumberFromString, AsYouType, getExampleNumber } from 'libphonenumber-js'
-  import VueInputUI from 'vue-input-ui'
-  import 'vue-input-ui/dist/vue-input-ui.css'
-  import CountrySelector from './_subs/CountrySelector'
+  import InputTel from './InputTel'
+  import CountrySelector from './CountrySelector'
   import locales from './assets/locales'
+  import { HexToRgba, isColorName, colorNameToHex } from 'color-transformer-ui'
+
+  const getShadowColor = (color) => {
+    return isColorName(color) ? HexToRgba(colorNameToHex(color), 0.7) : HexToRgba(color, 0.7)
+  }
 
   const browserLocale = () => {
     if (!window) return null
@@ -79,24 +85,25 @@
   }
 
   export default {
-    name: 'VuePhoneNumberInput',
+    name: 'MazPhoneNumberInput',
     components: {
-      VueInputUI,
+      InputTel,
       CountrySelector
     },
     props: {
-      value: { type: String, default: String },
-      id: { type: String, default: 'VuePhoneNumberInput' },
+      value: { type: String, default: null },
+      id: { type: String, default: 'MazPhoneNumberInput' },
       color: { type: String, default: 'dodgerblue' },
       validColor: { type: String, default: 'yellowgreen' },
-      dark: { type: Boolean, default: Boolean },
-      disabled: { type: Boolean, default: Boolean },
-      defaultCountryCode: { type: String, default: String },
-      size: { type: String, default: String },
+      errorColor: { type: String, default: 'orangered' },
+      darkColor: { type: String, default: '#424242' },
+      disabled: { type: Boolean, default: false },
+      defaultCountryCode: { type: String, default: null },
+      size: { type: String, default: null },
       preferredCountries: { type: Array, default: null },
       onlyCountries: { type: Array, default: null },
       ignoredCountries: { type: Array, default: Array },
-      translations: { type: Object, default: Object },
+      translations: { type: Object, default: null },
       noValidatorState: { type: Boolean, default: false },
       noFlags: { type: Boolean, default: false },
       error: { type: Boolean, default: false },
@@ -104,17 +111,23 @@
       required: { type: Boolean, default: false },
       countriesHeight: { type: Number, default: 30 },
       noUseBrowserLocale: { type: Boolean, default: false },
-      fetchCountry: { type: Boolean, default: false }
+      fetchCountry: { type: Boolean, default: false },
+      noCountrySelector: { type: Boolean, default: false },
+      showCodeOnList: { type: Boolean, default: false },
+      dark: { type: Boolean, default: false },
+      borderRadius: { type: Number, default: 4 }
     },
     data () {
       return {
         results: {},
-        inputFocused: false,
         userLocale: this.defaultCountryCode,
         lastKeyPressed: null
       }
     },
     computed: {
+      uniqueId () {
+        return `${this.id}-${this._uid}`
+      },
       t () {
         return {
           ...locales,
@@ -130,10 +143,7 @@
         },
         set (newCountry) {
           this.emitValues({countryCode: newCountry, phoneNumber: this.phoneNumber})
-          if (this.inputFocused) {
-            this.$refs.PhoneNumberInput.$el.querySelector('input').focus()
-          }
-          this.inputFocused = true
+          this.$refs.PhoneNumberInput.$el.querySelector('input').focus()
         }
       },
       phoneNumber: {
@@ -164,14 +174,49 @@
         return  this.noExample || !this.phoneNumberExample
           ? null
           : this.hasEmptyPhone || this.isValid ? null : `${this.t.example} ${this.phoneNumberExample}`
+      },
+      theme () {
+        return {
+          colorValue: this.color,
+          color: { color: this.color },
+          validColor: { color: this.validColor },
+          errorColor: { color: this.errorColor },
+          darkColor: { color: this.darkColor },
+          bgColor: { backgroundColor: this.color },
+          bgValidColor: { backgroundColor: this.validColor },
+          bgErrorColor: { backgroundColor: this.errorColor },
+          bgDarkColor: { backgroundColor: this.darkColor },
+          borderColor: { borderColor: this.color },
+          borderValidColor: { borderColor: this.validColor },
+          borderErrorColor: { borderColor: this.errorColor },
+          borderDarkColor: { borderColor: this.darkColor },
+          boxShadowColor: { boxShadow: `0 0 0 0.2rem ${getShadowColor(this.color)}` },
+          boxShadowValid: { boxShadow: `0 0 0 0.2rem ${getShadowColor(this.validColor)}` },
+          boxShadowError: { boxShadow: `0 0 0 0.2rem ${getShadowColor(this.errorColor)}` },
+          borderRadius: { borderRadius: `${this.borderRadius}px` },
+          borderLeftRadius: { borderTopLeftRadius: `${this.borderRadius}px`, borderBottomLeftRadius: `${this.borderRadius}px` },
+          borderRightRadius: { borderTopRightRadius: `${this.borderRadius}px`, borderBottomRightRadius: `${this.borderRadius}px` }
+        }
+      }
+    },
+    watch: {
+      defaultCountryCode (newValue, oldValue) {
+        if (newValue === oldValue) return
+        this.setLocale(newValue)
       }
     },
     async mounted () {
       try {
-        if (this.defaultCountryCode && this.fetchCountry)
-          throw new Error(`VuePhoneNumberInput: Do not use 'fetch-country' and 'default-country-code' options in the same time`)
-        if (this.defaultCountryCode && this.noUseBrowserLocale)
-          throw new Error(`VuePhoneNumberInput: If you use a 'default-country-code', do not use 'no-use-browser-locale' options`)
+        if (this.phoneNumber && this.defaultCountryCode) this.emitValues({countryCode: this.defaultCountryCode, phoneNumber: this.phoneNumber})
+
+        if (this.defaultCountryCode && this.fetchCountry) {
+          throw new Error('MazPhoneNumberInput: Do not use "fetch-country" and "default-country-code" options in the same time')
+        }
+
+        if (this.defaultCountryCode && this.noUseBrowserLocale) {
+          throw new Error('MazPhoneNumberInput: If you use a "default-country-code", do not use "no-use-browser-locale" options')
+        }
+
         if (this.defaultCountryCode) return
 
         this.fetchCountry
@@ -180,7 +225,7 @@
             ? this.setLocale(browserLocale())
             : null
       } catch (err) {
-        console.error(err)
+        throw new Error(err)
       }
     },
     methods: {
@@ -198,7 +243,8 @@
             : null
           ),
           ...(parsing
-            ? { 
+            ? {
+              countryCallingCode: parsing.countryCallingCode,
               formattedNumber: parsing.number,
               nationalNumber: parsing.nationalNumber,
               isValid: parsing.isValid(),
@@ -221,7 +267,7 @@
           if (backSpacePressed && lastCharacOfPhoneNumber && (lastCharacOfPhoneNumber.slice(-1) === ')')) {
             asYouType = this.phoneNumber.slice(0, -2)
             payload.phoneNumber = this.phoneNumber.slice(0, -2)
-          }  
+          }
 
           this.results = this.getParsePhoneNumberFromString(payload)
           this.$emit('update', this.results)
@@ -233,8 +279,7 @@
         if (countryAvailable && locale) {
           this.countryCode = locale
         } else if (!countryAvailable && locale) {
-          // If default country code is not available
-          console.warn(`The locale ${locale} is not available`)
+          window.console.warn(`The locale ${locale} is not available`)
         }
         this.userLocale = countryAvailable ? locale : null
       },
@@ -245,63 +290,35 @@
           const result = (responseText || '').toString()
           if (result && result[0] === '1') this.setLocale(result.substr(2, 2))
         } catch (err) {
-          console.error(err)
+          throw new Error(err)
         }
-      }
-    },
-    watch: {
-      defaultCountryCode (newValue, oldValue) {
-        if (newValue === oldValue) return
-        this.setLocale(newValue)
       }
     }
   }
 </script>
-<style lang="scss">
-  @import "./assets/scss/flexbox-helper.scss";
-  @import "./assets/iti-flags/flags.css";
+<style lang="scss" scoped>
+  @import 'style-helpers';
+
   .vue-phone-number-input {
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
-    font-family: Roboto, -apple-system, BlinkMacSystemFont, Segoe UI, Oxygen,
-        Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
     .select-country-container {
       flex: 0 0 120px;
       width: 120px;
       min-width: 120px;
       max-width: 120px;
     }
+
     &.sm .select-country-container {
       flex: 0 0 110px;
       width: 110px;
       min-width: 110px;
       max-width: 110px;
     }
+
     &.lg .select-country-container {
       flex: 0 0 130px;
       width: 130px;
       min-width: 130px;
       max-width: 130px;
-    }
-    .country-selector {
-      cursor: pointer;
-    }
-    .select-country-container {
-      .input-country-selector input {
-        border-top-right-radius: 0 !important; 
-        border-bottom-right-radius: 0 !important;
-      }
-    }
-    .input-phone-number input {
-      margin-left: -3px !important;
-      border-top-left-radius: 0 !important;
-      border-bottom-left-radius: 0 !important;
-    }
-    .input-phone-number:not(.is-dark):not(.is-disabled) {
-      input {
-        background-color: transparent !important;
-      }
     }
   }
 </style>
