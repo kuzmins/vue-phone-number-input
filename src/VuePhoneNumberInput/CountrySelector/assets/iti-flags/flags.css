@@ -1060,7 +1060,7 @@
 .iti-flag {
   width: 20px;
   height: 15px;
-  background-image: url("./flags.png");
+  background-image: url('./flags.png');
   background-repeat: no-repeat;
   background-color: #dbdbdb;
   background-position: 20px 0;
@@ -1072,7 +1072,7 @@
   only screen and (min-resolution: 192dpi),
   only screen and (min-resolution: 2dppx) {
   .iti-flag {
-    background-image: url("./flags@2x.png");
+    background-image: url('./flags.png');
   }
 }
 .iti-flag.np {
